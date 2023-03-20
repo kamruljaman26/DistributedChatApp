@@ -54,7 +54,7 @@
                         <!-- Usage: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.chat.app.Main</mainClass>
+                            <mainClass>com.chat.app.App</mainClass>
                         </configuration>
                     </execution>
                 </executions>

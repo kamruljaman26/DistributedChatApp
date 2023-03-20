@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="510.0" prefWidth="433.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chat.app.controller.ChatViewController">
+   <children>
+      <Label layoutX="26.0" layoutY="25.0" text="Welcome to personal chatbox">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="memberLblId" layoutX="26.0" layoutY="71.0" text="ID: ">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Line endX="279.0" layoutX="127.0" layoutY="61.0" startX="-100.0" />
+      <Line endX="279.0" layoutX="127.0" layoutY="103.0" startX="-100.0" />
+      <TextArea layoutX="27.0" layoutY="111.0" prefHeight="347.0" prefWidth="380.0" />
+      <Button layoutX="27.0" layoutY="467.0" mnemonicParsing="false" onAction="#quitButtonAction" prefHeight="34.0" prefWidth="55.0" text="QUIT" />
+      <Button layoutX="353.0" layoutY="467.0" mnemonicParsing="false" onAction="#sendButtonAction" prefHeight="34.0" prefWidth="55.0" text="SEND" />
+      <TextField fx:id="messageTxtFldId" layoutX="89.0" layoutY="467.0" prefHeight="34.0" prefWidth="258.0" promptText="type your message" />
+   </children>
+</AnchorPane>

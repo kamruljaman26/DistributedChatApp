@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="277.0" prefWidth="421.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chat.app.controller.ChatViewController">
+   <children>
+      <Label layoutX="37.0" layoutY="25.0" text="Member Creation">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+      </Label>
+      <TextField fx:id="memberIdTxtFldId" disable="true" layoutX="154.0" layoutY="68.0" prefHeight="25.0" prefWidth="225.0" />
+      <Label layoutX="36.0" layoutY="72.0" text="Member Id:" />
+      <TextField fx:id="serverPortTxtFldID" layoutX="154.0" layoutY="104.0" prefHeight="25.0" prefWidth="225.0" />
+      <Label layoutX="36.0" layoutY="108.0" text="Server Port No:" />
+      <TextField fx:id="serverIpAddressTxtFldID" layoutX="154.0" layoutY="140.0" prefHeight="25.0" prefWidth="225.0" />
+      <Label layoutX="36.0" layoutY="144.0" text="Server IP Address:" />
+      <TextField fx:id="listeningPortIpAddressTxtFld" layoutX="154.0" layoutY="177.0" prefHeight="25.0" prefWidth="225.0" />
+      <Label layoutX="36.0" layoutY="181.0" text="Your Listening Port:" />
+      <Button layoutX="118.0" layoutY="226.0" mnemonicParsing="false" onAction="#startChatButtonAction" prefHeight="25.0" prefWidth="190.0" text="START CHATING" />
+   </children>
+</AnchorPane>
