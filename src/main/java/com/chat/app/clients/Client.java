@@ -18,7 +18,7 @@ public class Client {
     public static void main(String[] args) {
         try {
             InetAddress IP_ADDRESS = GroupMessingServer.IP_ADDRESS;
-
+            System.out.println(IP_ADDRESS);
             Socket socket = new Socket(IP_ADDRESS, 9000);
             System.out.println(socket);
 

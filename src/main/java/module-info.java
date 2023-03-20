@@ -4,8 +4,6 @@ module com.chat.app {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.naming;
-
-    // Retrofit
     requires java.prefs;
 
     // sqlite and hibernate, google

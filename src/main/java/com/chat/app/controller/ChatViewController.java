@@ -16,14 +16,6 @@ public class ChatViewController implements Initializable, DTO {
     public Label memberLblId;
     @FXML
     public TextField messageTxtFldId;
-    @FXML
-    public TextField memberIdTxtFldId;
-    @FXML
-    public TextField serverPortTxtFldID;
-    @FXML
-    public TextField serverIpAddressTxtFldID;
-    @FXML
-    public TextField listeningPortIpAddressTxtFld;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -42,11 +34,6 @@ public class ChatViewController implements Initializable, DTO {
 
     @FXML
     public void sendButtonAction(ActionEvent event) {
-    }
-
-    @FXML
-    public void startChatButtonAction(ActionEvent event) {
-
     }
 
 }

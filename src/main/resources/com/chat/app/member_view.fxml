@@ -16,27 +16,31 @@
             <Font name="Arial Black" size="30.0" />
          </font>
       </Label>
-      <ListView fx:id="membersListViewId" layoutX="25.0" layoutY="111.0" prefHeight="338.0" prefWidth="352.0" />
-      <Line endX="75.0" layoutX="397.0" layoutY="63.0" startX="-100.0" />
-      <Button layoutX="202.0" layoutY="77.0" mnemonicParsing="false" onAction="#refreshStateButtonAction" prefHeight="25.0" prefWidth="176.0" text="REFRESH STATE" />
-      <Label layoutX="26.0" layoutY="76.0" text="Members List">
+      <ListView fx:id="membersListViewId" layoutX="25.0" layoutY="141.0" prefHeight="338.0" prefWidth="352.0" />
+      <Button layoutX="202.0" layoutY="107.0" mnemonicParsing="false" onAction="#refreshStateButtonAction" prefHeight="25.0" prefWidth="176.0" text="REFRESH STATE" />
+      <Label layoutX="26.0" layoutY="106.0" text="Members List">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Label>
-      <TextArea fx:id="groupChatAreaId" layoutX="404.0" layoutY="111.0" prefHeight="305.0" prefWidth="388.0" />
+      <TextArea fx:id="groupChatAreaId" layoutX="404.0" layoutY="141.0" prefHeight="305.0" prefWidth="388.0" />
       <Button layoutX="739.0" layoutY="423.0" mnemonicParsing="false" onAction="#groupSendBtnAction" prefHeight="25.0" prefWidth="54.0" text="SEND" />
-      <Label layoutX="403.0" layoutY="77.0" text="Group ChatBox">
+      <Label layoutX="403.0" layoutY="107.0" text="Group ChatBox">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Label>
-      <Line endX="-100.0" endY="171.0" layoutX="490.0" layoutY="183.0" startX="-100.0" />
-      <Label layoutX="19.0" layoutY="448.0" prefHeight="46.0" prefWidth="768.0" style="-fx-alignment: center;" textFill="#861616">
+      <Line endX="-100.0" endY="171.0" layoutX="490.0" layoutY="213.0" startX="-100.0" />
+      <Label layoutX="19.0" layoutY="478.0" prefHeight="46.0" prefWidth="768.0" style="-fx-alignment: center;" textFill="#861616">
          <font>
             <Font name="System Italic" size="12.0" />
          </font>
       </Label>
-      <TextField fx:id="sendMsgTxtFldId" layoutX="404.0" layoutY="424.0" prefHeight="25.0" prefWidth="329.0" />
+      <TextField fx:id="sendMsgTxtFldId" layoutX="404.0" layoutY="454.0" prefHeight="25.0" prefWidth="329.0" />
+      <Label fx:id="memberdetailsLblId" layoutX="78.0" layoutY="57.0" prefHeight="36.0" prefWidth="645.0" text="Member Details: ">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

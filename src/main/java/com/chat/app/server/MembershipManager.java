@@ -1,13 +1,13 @@
 package com.chat.app.server;
 
 import com.chat.app.model.Member;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 
 // used singleton pattern so there will only one membership manager object.
 public class MembershipManager {
 
-    private static Map<String, Member> members;
+    private Map<String, Member> members;
     private static MembershipManager membershipManager;
     private String coordinatorId = null;
 
@@ -18,9 +18,16 @@ public class MembershipManager {
 
     // return singleton object
     public static synchronized MembershipManager getInstance() {
-        if (membershipManager == null)
+        if (membershipManager == null) {
+            System.out.println("MembershipManager");
             membershipManager = new MembershipManager();
+        }
         return membershipManager;
+    }
+
+    // return all members as list
+    public List<Member> getMembers() {
+        return new ArrayList<>(members.values());
     }
 
     // result can be null when no member in list
@@ -42,7 +49,7 @@ public class MembershipManager {
 
     // check id in server to find out is unique or not
     public boolean isUniqueId(String id) {
-        return members.containsKey(id);
+        return !members.containsKey(id);
     }
 
     // add members

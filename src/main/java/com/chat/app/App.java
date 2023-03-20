@@ -1,6 +1,7 @@
 package com.chat.app;
 
 
+import com.chat.app.server.GroupMessingServer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,22 +9,37 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.net.URL;
-import java.util.Objects;
 
 public class App extends Application {
 
-    public static void main(String[] args) {
-        launch(args);
-    }
-
     @Override
     public void start(Stage stage) throws Exception {
-        System.out.println(App.class.getResource("").getPath());
-        URL resource = App.class.getResource("chat_view.fxml");
-        Parent root = FXMLLoader.load(resource);
-        Scene scene = new Scene(root);
-        stage.setResizable(false);
-        stage.setScene(scene);
-        stage.show();
+
+        /*
+         * Create 3 new member register window for demonstration
+         */
+        for (int i = 0; i < 3; i++) {
+            URL resource = App.class.getResource("create_member.fxml");
+            Parent root = FXMLLoader.load(resource);
+            Scene scene = new Scene(root);
+
+            stage = new Stage();
+            stage.setTitle("Create New Chat Member");
+            stage.setResizable(false);
+            stage.setScene(scene);
+
+            stage.setOnCloseRequest(event1 -> {
+                System.out.println("IN CREATE MEMBER CLOSE");
+            });
+
+            stage.show();
+        }
+
+        // run server
+        GroupMessingServer.getInstance();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }

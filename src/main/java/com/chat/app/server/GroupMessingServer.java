@@ -12,7 +12,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GroupMessingServer implements Runnable {
+public class GroupMessingServer {
 
     public static final int DEFAULT_PORT = 9000;
     public static InetAddress IP_ADDRESS;
@@ -22,7 +22,7 @@ public class GroupMessingServer implements Runnable {
     // clients and membership manager
     private static Map<String, ClientHandler> clients;
     private static MembershipManager manager;
-    private static final GroupMessingServer server = new GroupMessingServer();
+    private static GroupMessingServer server;
 
     // default constructor
     private GroupMessingServer() {
@@ -30,30 +30,37 @@ public class GroupMessingServer implements Runnable {
             IP_ADDRESS = InetAddress.getLocalHost();
             clients = new HashMap<>();
             manager = MembershipManager.getInstance();
+            System.out.println("Server IP: " + IP_ADDRESS.getHostAddress());
+
+            // create server in separate thread
+            Thread thread = new Thread(() -> {
+                try {
+                    createServer();
+                } catch (IOException | ClassNotFoundException e) {
+                    System.out.println("Error while init group messaging server");
+                    e.printStackTrace();
+                }
+            });
+            thread.start();
+
         } catch (UnknownHostException e) {
             System.out.println("Error while init group messaging server");
+            e.printStackTrace();
         }
     }
 
     // return singleton server
-    public static GroupMessingServer getInstance() {
+    public static synchronized GroupMessingServer getInstance() {
+        if (server == null)
+            server = new GroupMessingServer();
         return server;
     }
 
     // return membership manager
-    public MembershipManager getManager() {
+    public synchronized MembershipManager getManager() {
         return manager;
     }
 
-    // run thread
-    @Override
-    public void run() {
-        try {
-            createServer();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
 
     // create the server for our chat application
     private void createServer() throws IOException, ClassNotFoundException {
@@ -171,8 +178,4 @@ public class GroupMessingServer implements Runnable {
         }
     }
 
-    public static void main(String[] args) {
-        GroupMessingServer instance = GroupMessingServer.getInstance();
-        instance.run();
-    }
 }
