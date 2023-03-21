@@ -18,7 +18,7 @@ public class App extends Application {
         /*
          * Create 3 new member register window for demonstration
          */
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
 
             URL resource = App.class.getResource("create_member.fxml");
             Parent root = FXMLLoader.load(resource);
@@ -34,6 +34,10 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
+        // start server
+        Thread thread = new Thread(new GroupMessingServer());
+        thread.start();
+        
         launch(args);
     }
 }

@@ -10,6 +10,7 @@ module com.chat.app {
     requires java.sql;
     requires junit;
     requires java.base;
+    requires org.jetbrains.annotations;
 
     exports com.chat.app;
     exports com.chat.app.server;

@@ -90,8 +90,10 @@ public class CreateMemberController implements Initializable {
 
             stage.setOnCloseRequest(event1 -> {
                 System.out.println("IN CHAT VIEW CLOSE");
-                // TODO: REMOVE FROM MEMBERSHIP &
-                // CLIENT HANDLER
+                // TODO: REMOVE FROM MEMBERSHIP & ADN CLOSE CLIENT HANDLER
+                manager.removeMember(member);
+                System.out.println("Member Removed:" + member);
+                System.out.println("Coordinator: " + manager.getCoordinator());
             });
 
             stage.show();

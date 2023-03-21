@@ -29,7 +29,7 @@ public class MembershipManagerTest {
     public void testRemoveMemberById() {
         Member member = new Member("1", "John Doe", 1234, 12345);
         membershipManager.addMember(member);
-        assertTrue(membershipManager.removeMember("1"));
+        assertTrue(membershipManager.removeMember(member));
         assertNull(membershipManager.getMember("1"));
     }
 

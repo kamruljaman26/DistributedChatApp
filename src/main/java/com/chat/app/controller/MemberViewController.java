@@ -9,10 +9,13 @@ import com.chat.app.util.DTO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 
 import java.io.*;
@@ -39,7 +42,7 @@ public class MemberViewController implements Initializable, DTO {
     private Member mainMember;
     private static final MembershipManager manager;
     //    private volatile static GroupMessingServer server;
-    private ObjectOutputStream outputStream;
+    private volatile ObjectOutputStream outputStream;
     private volatile ObjectInputStream inputStream;
 
     // static block
@@ -140,6 +143,16 @@ public class MemberViewController implements Initializable, DTO {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        sendMsgTxtFldId.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                if (keyEvent.getCode() == KeyCode.ENTER) {
+                    // code to execute when the "Enter" key is pressed
+                    groupSendBtnAction(new ActionEvent());
+                }
+            }
+        });
+
     }
 
     @FXML

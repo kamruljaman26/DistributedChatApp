@@ -22,6 +22,7 @@ public class ServerRunner {
         System.out.println(InetAddress.getLocalHost().getHostAddress());
 
         // run server
-        new GroupMessingServer().run();
+        Thread thread = new Thread(new GroupMessingServer());
+        thread.start();
     }
 }
