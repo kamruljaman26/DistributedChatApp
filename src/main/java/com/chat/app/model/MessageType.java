@@ -5,6 +5,7 @@ import java.io.Serializable;
 public enum MessageType {
     BROADCAST,
     PRIVATE,
-    NOTIFICATION
+    NOTIFICATION,
+    REMOVE
 }
 

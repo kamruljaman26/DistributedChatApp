@@ -30,7 +30,6 @@ public class App extends Application {
             customStage.setScene(scene);
 
             customStage.show();
-
         }
     }
 

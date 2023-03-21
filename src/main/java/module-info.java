@@ -14,13 +14,9 @@ module com.chat.app {
 
     exports com.chat.app;
     exports com.chat.app.server;
-    exports com.chat.app.views;
     exports com.chat.app.controller;
-    exports com.chat.app.clients;
     exports com.chat.app.model;
     exports com.chat.app.util;
 
     opens com.chat.app;
-    opens com.chat.app.views;
-
 }

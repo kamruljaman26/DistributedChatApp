@@ -17,13 +17,11 @@ public class GroupMessingServer implements Runnable {
 
     public static final int DEFAULT_PORT = 9000;
     public static InetAddress IP_ADDRESS;
-    private static final int MAX_CLIENTS = 10;
-    private static final int TIMEOUT_MS = 10000;
 
     // clients and membership manager
+    private volatile static Map<String, Thread> clients;
     private volatile static Map<String, ObjectOutputStream> outputStreams;
     private volatile static MembershipManager manager;
-//    private volatile static GroupMessingServer server;
 
     // static block
     static {
@@ -31,25 +29,11 @@ public class GroupMessingServer implements Runnable {
             IP_ADDRESS = InetAddress.getLocalHost();
             manager = MembershipManager.getInstance();
             outputStreams = new HashMap<>();
+            clients = new HashMap<>();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
     }
-
-    // return singleton server
-/*    public static synchronized GroupMessingServer getInstance() {
-        if (server == null) {
-            server = new GroupMessingServer();
-            return server;
-        } else
-            return server;
-    }*/
-
-    // return membership manager
-//    public synchronized MembershipManager getManager() {
-//        return manager;
-//    }
-
 
     @Override
     public void run() {
@@ -68,6 +52,31 @@ public class GroupMessingServer implements Runnable {
     // remove object output stream of inactive member
     public static synchronized void removeOutputStream(String id) {
         outputStreams.remove(id);
+    }
+
+    // remove and notify a member
+    public static synchronized void removeAndNotify(Member member) {
+        Member coordinator = manager.getCoordinator();
+        Message message = new Message(coordinator, member, MessageType.REMOVE, member.getId() + " has been removed by " +
+                "coordinator("+coordinator.getId()+")!");
+
+        System.out.println("Server: Removed and sending notification to member");
+
+        try {
+            // notify everyone about remove operation
+            for (ObjectOutputStream out : outputStreams.values()) {
+                out.writeObject(message);
+                out.flush();
+            }
+
+            // removed from everywhere & stop client handler thread
+            manager.removeMember(member);
+            outputStreams.remove(member.getId());
+            Thread clientHandler = clients.get(member.getId());
+            clientHandler.stop();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // send notification to all active members
@@ -99,7 +108,7 @@ public class GroupMessingServer implements Runnable {
             // accept clients
             socket = serverSocket.accept();
             System.out.println("");
-            System.out.println(" ---- Socket Accept ---- ");
+            System.out.println(" ---- Socket Accepted ---- ");
 
             // read member and in membership list
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -115,13 +124,13 @@ public class GroupMessingServer implements Runnable {
                 System.out.println(serverSocket);
 
                 ClientHandler clientHandler = new ClientHandler(socket, member, objectInputStream, objectOutputStream);
-
-//                clients.put(member.getId(), clientHandler);
+                Thread thread = new Thread(clientHandler);
+                clients.put(member.getId(), thread);
                 outputStreams.put(member.getId(), objectOutputStream);
 
                 System.out.println("New Member Connected In Server: " + member);
 
-                new Thread(clientHandler).start();
+                thread.start();
             } else {
                 System.out.println("IN SERVER: Member is null.");
             }
