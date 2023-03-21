@@ -6,6 +6,7 @@ public enum MessageType {
     BROADCAST,
     PRIVATE,
     NOTIFICATION,
-    REMOVE
+    REMOVE,
+    NEW_CHAT
 }
 

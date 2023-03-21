@@ -42,5 +42,6 @@
             <Font size="18.0" />
          </font>
       </Label>
+      <Button layoutX="778.0" layoutY="108.0" mnemonicParsing="false" onAction="#quitButtonAction" prefHeight="25.0" prefWidth="84.0" text="QUIT" />
    </children>
 </AnchorPane>

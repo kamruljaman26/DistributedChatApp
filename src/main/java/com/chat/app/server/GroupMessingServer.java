@@ -185,16 +185,17 @@ public class GroupMessingServer implements Runnable {
 
                         // if PRIVATE MESSAGE send to specific member
                         if (receivedMessage.getMessageType().equals(MessageType.PRIVATE)) {
-                            System.out.println("PRIVATE");
+                            ObjectOutputStream out = outputStreams.get(receivedMessage.getReceiver().getId());
+                            out.writeObject(receivedMessage);
+                            out.flush();
                         }
 
                         // if BROADCAST or NOTIFICATION message send to everyone, except me
                         else if (receivedMessage.getMessageType().equals(MessageType.BROADCAST) ||
                                 receivedMessage.getMessageType().equals(MessageType.NOTIFICATION)) {
-//                            System.out.println("BROADCAST OR NOTIFICATION");
+
                             // send to all
                             for (ObjectOutputStream out : outputStreams.values()) {
-//                                System.out.println("Object :: SEND ::" + member.getId());
                                 out.writeObject(receivedMessage);
                                 out.flush();
                             }

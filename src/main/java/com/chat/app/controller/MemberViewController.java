@@ -1,33 +1,39 @@
 package com.chat.app.controller;
 
+import com.chat.app.App;
 import com.chat.app.model.Member;
 import com.chat.app.model.Message;
 import com.chat.app.model.MessageType;
 import com.chat.app.server.GroupMessingServer;
 import com.chat.app.server.MembershipManager;
 import com.chat.app.util.DTO;
+import com.chat.app.util.SendMessage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
  *
  */
-public class MemberViewController implements Initializable, DTO {
+public class MemberViewController implements Initializable, DTO, SendMessage {
 
     @FXML
     public ListView<Member> membersListViewId;
@@ -46,6 +52,9 @@ public class MemberViewController implements Initializable, DTO {
     private volatile ObjectOutputStream outputStream;
     private volatile ObjectInputStream inputStream;
 
+    // private chats
+    private volatile Map<String, SendMessage> sendMessageMap = new HashMap<>();
+
     // static block
     static {
         manager = MembershipManager.getInstance();
@@ -61,7 +70,7 @@ public class MemberViewController implements Initializable, DTO {
                 mainMember.getId(), mainMember.getListeningPort(), manager.isCoordinator(mainMember)));
 
         // init list view with members
-        membersListViewId.setCellFactory(param -> new MemberListCell(mainMember));
+        membersListViewId.setCellFactory(param -> new MemberListCell(mainMember, this, sendMessageMap));
         updateMemberListState();
 
         // inform user she/he is the coordinator
@@ -81,14 +90,23 @@ public class MemberViewController implements Initializable, DTO {
     }
 
     @Override
+    public void send(Message message) {
+        // send message to server
+        try {
+            outputStream.writeObject(message);
+            outputStream.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void initialize(URL location, ResourceBundle resources) {
-        sendMsgTxtFldId.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                if (keyEvent.getCode() == KeyCode.ENTER) {
-                    // code to execute when the "Enter" key is pressed
-                    groupSendBtnAction(new ActionEvent());
-                }
+        sendMsgTxtFldId.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode() == KeyCode.ENTER) {
+                // code to execute when the "Enter" key is pressed
+                groupSendBtnAction(new ActionEvent());
             }
         });
 
@@ -146,7 +164,7 @@ public class MemberViewController implements Initializable, DTO {
                 try {
                     // read the message sent to this client
                     Message msg = (Message) inputStream.readObject();
-                    System.out.println("READ MESSAGE WHILE(" + mainMember.getId() + "):: " + msg);
+//                    System.out.println("READ MESSAGE WHILE(" + mainMember.getId() + "):: " + msg);
 
                     // read notification
                     if (msg.getMessageType().equals(MessageType.NOTIFICATION)) {
@@ -165,9 +183,15 @@ public class MemberViewController implements Initializable, DTO {
                         addText(msg);
                     }
 
-                    // read broadcast message
+                    // read private message
                     if (msg.getMessageType().equals(MessageType.PRIVATE)) {
-                        addText(msg);
+
+                        if (sendMessageMap.containsKey(msg.getSender().getId())) {
+                            sendMessageMap.get(msg.getSender().getId()).send(msg);
+                        } else {
+                            addText(new Message(null, null, MessageType.NEW_CHAT,
+                                    msg.getSender().getId() + " want to open private chat with!"));
+                        }
                     }
 
                 } catch (IOException | ClassNotFoundException e) {
@@ -178,8 +202,20 @@ public class MemberViewController implements Initializable, DTO {
         readMessage.start();
     }
 
-    // add text in group chat box
+    /**
+     * Show messaged with tag
+     *
+     * @param message
+     */
     private synchronized void addText(Message message) {
+
+        // show notification in chat area
+        if (message.getMessageType().equals(MessageType.NEW_CHAT)) {
+            String oldTxt = groupChatAreaId.getText();
+            groupChatAreaId.setText(oldTxt + "\n" + String.format(
+                    "REQUEST::\t%s", message.getMessage()
+            ));
+        }
 
         // show notification in chat area
         if (message.getMessageType().equals(MessageType.NOTIFICATION)) {
@@ -220,6 +256,12 @@ public class MemberViewController implements Initializable, DTO {
         notificationLebelID.setText("");
     }
 
+    // close the app
+    public void quitButtonAction(ActionEvent event) {
+        Stage window = (Stage) notificationLebelID.getScene().getWindow();
+        window.close();
+    }
+
     /**
      * Custom designed cell for members list
      */
@@ -232,9 +274,13 @@ public class MemberViewController implements Initializable, DTO {
         private final Button remove = new Button();
         private final Button chatButton = new Button();
         private final Member mainMember;
+        private final SendMessage memberViewController;
+        private final Map<String, SendMessage> sendMessageMap;
 
-        public MemberListCell(Member mainMember) {
+        public MemberListCell(Member mainMember, SendMessage memberViewController, Map<String, SendMessage> sendMessageMap) {
             this.mainMember = mainMember;
+            this.memberViewController = memberViewController;
+            this.sendMessageMap = sendMessageMap;
         }
 
         @Override
@@ -279,7 +325,36 @@ public class MemberViewController implements Initializable, DTO {
 
             // handle personal details button
             chatButton.setOnAction(event -> {
-                System.out.println("In personal chat");
+                try {
+
+                    // should only open one chat box per member
+                    if (!sendMessageMap.containsKey(member.getId())) {
+
+                        FXMLLoader loader = new FXMLLoader(App.class.getResource("chat_view.fxml"));
+                        Parent layout = loader.load();
+
+                        // transfer sender, receiver, and controller
+                        DTO controller = loader.getController();
+                        controller.transfer(mainMember, member, memberViewController);
+
+                        // save send message controller
+                        SendMessage chatController = loader.getController();
+                        sendMessageMap.put(member.getId(), chatController);
+
+                        Stage stage = new Stage();
+                        Scene scene = new Scene(layout);
+                        stage.setTitle("Personal Chat");
+                        stage.setScene(scene);
+                        stage.show();
+
+                        // remove after close
+                        stage.setOnCloseRequest(event1 -> {
+                            sendMessageMap.remove(member.getId());
+                        });
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             });
 
             return hbox;
