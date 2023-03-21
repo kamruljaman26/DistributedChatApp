@@ -3,10 +3,9 @@ package com.chat.app.controller;
 import com.chat.app.App;
 import com.chat.app.model.Member;
 import com.chat.app.server.GroupMessingServer;
+import com.chat.app.server.MembershipManager;
 import com.chat.app.util.DTO;
-import javafx.beans.property.ObjectProperty;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -16,7 +15,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,11 +34,15 @@ public class CreateMemberController implements Initializable {
     public Label errorTxtMsgId;
 
     // server and manager
-    private GroupMessingServer server;
+    private volatile static MembershipManager manager;
+
+    // static block
+    static {
+        manager = MembershipManager.getInstance();
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        server = GroupMessingServer.getInstance();
     }
 
     @FXML
@@ -58,11 +60,10 @@ public class CreateMemberController implements Initializable {
             }
 
             // check id is unique or not
-            else if (server.getManager().isUniqueId(id)) {
+            else if (manager.isUniqueId(id)) {
                 Member member = new Member(id, serverIpAddress, serverPort, listeningPort);
-                server.getManager().addMember(member);
+                manager.addMember(member);
                 loadMemberView(member, event);
-                System.out.println("Member created! = " + member);
             } else {
                 errorTxtMsgId.setText(id + " id is already registered in server, please try with a different id.");
             }

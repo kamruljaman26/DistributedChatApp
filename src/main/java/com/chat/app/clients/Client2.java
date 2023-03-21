@@ -17,7 +17,7 @@ import java.util.Scanner;
 public class Client2 {
     public static void main(String[] args) {
         try {
-            InetAddress IP_ADDRESS = GroupMessingServer.IP_ADDRESS;
+            InetAddress IP_ADDRESS = InetAddress.getLocalHost();
 
             Socket socket = new Socket(IP_ADDRESS, 9000);
             System.out.println(socket);

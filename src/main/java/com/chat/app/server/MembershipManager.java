@@ -19,7 +19,6 @@ public class MembershipManager {
     // return singleton object
     public static synchronized MembershipManager getInstance() {
         if (membershipManager == null) {
-            System.out.println("MembershipManager");
             membershipManager = new MembershipManager();
         }
         return membershipManager;

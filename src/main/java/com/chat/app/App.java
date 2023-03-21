@@ -19,24 +19,18 @@ public class App extends Application {
          * Create 3 new member register window for demonstration
          */
         for (int i = 0; i < 3; i++) {
+
             URL resource = App.class.getResource("create_member.fxml");
             Parent root = FXMLLoader.load(resource);
             Scene scene = new Scene(root);
 
-            stage = new Stage();
-            stage.setTitle("Create New Chat Member");
-            stage.setResizable(false);
-            stage.setScene(scene);
+            Stage customStage = new Stage();
+            customStage.setTitle("Create New Chat Member");
+            customStage.setScene(scene);
 
-            stage.setOnCloseRequest(event1 -> {
-                System.out.println("IN CREATE MEMBER CLOSE");
-            });
+            customStage.show();
 
-            stage.show();
         }
-
-        // run server
-        GroupMessingServer.getInstance();
     }
 
     public static void main(String[] args) {

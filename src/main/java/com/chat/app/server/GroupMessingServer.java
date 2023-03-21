@@ -9,10 +9,11 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GroupMessingServer {
+public class GroupMessingServer implements Runnable {
 
     public static final int DEFAULT_PORT = 9000;
     public static InetAddress IP_ADDRESS;
@@ -20,40 +21,34 @@ public class GroupMessingServer {
     private static final int TIMEOUT_MS = 10000;
 
     // clients and membership manager
-    private static Map<String, ClientHandler> clients;
-    private static MembershipManager manager;
-    private static GroupMessingServer server;
+//    private volatile static Map<String, ClientHandler> clients;
+    private volatile static Map<String, ObjectOutputStream> outputStreams;
+    private volatile static MembershipManager manager;
+    private volatile static GroupMessingServer server;
 
-    // default constructor
-    private GroupMessingServer() {
+    // static block
+    static {
         try {
             IP_ADDRESS = InetAddress.getLocalHost();
-            clients = new HashMap<>();
+//            clients = new HashMap<>();
             manager = MembershipManager.getInstance();
-            System.out.println("Server IP: " + IP_ADDRESS.getHostAddress());
-
-            // create server in separate thread
-            Thread thread = new Thread(() -> {
-                try {
-                    createServer();
-                } catch (IOException | ClassNotFoundException e) {
-                    System.out.println("Error while init group messaging server");
-                    e.printStackTrace();
-                }
-            });
-            thread.start();
-
+            outputStreams = new HashMap<>();
         } catch (UnknownHostException e) {
-            System.out.println("Error while init group messaging server");
             e.printStackTrace();
         }
     }
 
+    // default constructor
+    public GroupMessingServer() {
+    }
+
     // return singleton server
     public static synchronized GroupMessingServer getInstance() {
-        if (server == null)
+        if (server == null) {
             server = new GroupMessingServer();
-        return server;
+            return server;
+        } else
+            return server;
     }
 
     // return membership manager
@@ -61,26 +56,46 @@ public class GroupMessingServer {
         return manager;
     }
 
+/*    // get client handeler
+    public synchronized ClientHandler getClientHandler(String id) {
+        return clients.get(id);
+    }*/
+
+    @Override
+    public void run() {
+        // create server in separate thread
+        Thread thread = new Thread(() -> {
+            try {
+                createServer();
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("Error while init group messaging server");
+                e.printStackTrace();
+            }
+        });
+        thread.start();
+    }
 
     // create the server for our chat application
     private void createServer() throws IOException, ClassNotFoundException {
         ServerSocket serverSocket = new ServerSocket(DEFAULT_PORT, 50, IP_ADDRESS);
         Socket socket;
 
-        System.out.println("Server started on port " + DEFAULT_PORT);
+        // server details
+        System.out.println("Server started on port: " + DEFAULT_PORT);
+        System.out.println("Server started on ip: " + IP_ADDRESS);
+
         while (true) {
             // accept clients
             socket = serverSocket.accept();
-//            System.out.println("accept client");
+            System.out.println("");
+            System.out.println(" ---- Socket Accept ---- ");
 
             // read member and in membership list
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
 
-//            System.out.println("objectInputStream");
+            // read member
             Member member = (Member) objectInputStream.readObject();
-//            System.out.println("read mm" + member);
-
             if (member != null) {
                 manager.addMember(member);
 
@@ -89,12 +104,15 @@ public class GroupMessingServer {
                 System.out.println(serverSocket);
 
                 ClientHandler clientHandler = new ClientHandler(socket, member, objectInputStream, objectOutputStream);
-                clients.put(member.getId(), clientHandler);
 
-//                System.out.println("start thread");
+//                clients.put(member.getId(), clientHandler);
+                outputStreams.put(member.getId(), objectOutputStream);
+
+                System.out.println("New Member Connected In Server: " + member);
+
                 new Thread(clientHandler).start();
-
-                System.out.println(member); // dbug
+            } else {
+                System.out.println("IN SERVER: Member is null.");
             }
         }
     }
@@ -140,42 +158,40 @@ public class GroupMessingServer {
                 try {
                     // receive the message
                     Message receivedMessage = (Message) inputStream.readObject();
-                    System.out.println(receivedMessage);
 
                     if (receivedMessage != null) {
 
+                        System.out.printf("Message Server: (to: , %s from: %s, Msg: %s\n",
+                                receivedMessage.getReceiver(), receivedMessage.getSender(),
+                                receivedMessage.getMessage());
+
                         // if PRIVATE MESSAGE send to specific member
                         if (receivedMessage.getMessageType().equals(MessageType.PRIVATE)) {
-                            clients.get(receivedMessage.getReceiver().getId()).getOutputStream().writeObject(receivedMessage);
+                            System.out.println("PRIVATE");
                         }
 
                         // if BROADCAST or NOTIFICATION message send to everyone, except me
                         else if (receivedMessage.getMessageType().equals(MessageType.BROADCAST) ||
                                 receivedMessage.getMessageType().equals(MessageType.NOTIFICATION)) {
-
+                            System.out.println("BROADCAST OR NOTIFICATION");
                             // send to all
-                            final Message finalReceivedMessage = receivedMessage;
-                            clients.values().forEach(clientHandler -> {
-                                try {
-                                    // ignore sender
-                                    if (clientHandler.getMember().getId().equals(member.getId())) {
-                                        clientHandler.getOutputStream().writeObject(finalReceivedMessage);
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            });
+                            for (ObjectOutputStream out : outputStreams.values()) {
+                                System.out.println("Object :: SEND ::" + member.getId());
+                                out.writeObject(receivedMessage);
+                                out.flush();
+                            }
                         }
 
                     } else {
-                        System.out.println("error message is null");
+                        System.out.println("error message is null!");
                     }
 
                 } catch (IOException | ClassNotFoundException e) {
                     System.out.println("Exception while sending message");
+                    e.printStackTrace();
+                    System.exit(0);
                 }
             }
         }
     }
-
 }

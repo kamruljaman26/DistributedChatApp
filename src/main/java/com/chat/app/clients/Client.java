@@ -4,9 +4,7 @@ import com.chat.app.model.Member;
 import com.chat.app.model.Message;
 import com.chat.app.model.MessageType;
 import com.chat.app.server.GroupMessingServer;
-
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -17,14 +15,13 @@ import java.util.Scanner;
 public class Client {
     public static void main(String[] args) {
         try {
-            InetAddress IP_ADDRESS = GroupMessingServer.IP_ADDRESS;
-            System.out.println(IP_ADDRESS);
+            InetAddress IP_ADDRESS = InetAddress.getLocalHost();
             Socket socket = new Socket(IP_ADDRESS, 9000);
             System.out.println(socket);
 
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 
-            Member member = new Member("kkk", "localhost", 9000, 8000);
+            Member member = new Member("kkk", "192.168.0.100", 9000, 8000);
             out.writeObject(member);
             out.flush();
 
@@ -38,7 +35,6 @@ public class Client {
                 Message message1 = new Message(member, member, MessageType.BROADCAST, message);
                 out.writeObject(message1);
                 out.flush();
-
             }
         } catch (IOException e) {
             e.printStackTrace();
