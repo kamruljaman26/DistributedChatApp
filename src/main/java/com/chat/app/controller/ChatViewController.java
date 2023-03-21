@@ -13,9 +13,9 @@ import java.util.ResourceBundle;
 public class ChatViewController implements Initializable, DTO {
 
     @FXML
-    public Label memberLblId;
-    @FXML
     public TextField messageTxtFldId;
+    @FXML public Label senderLblId;
+    @FXML public Label receiverLblID;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

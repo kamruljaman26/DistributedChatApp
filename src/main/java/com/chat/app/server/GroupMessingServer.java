@@ -60,8 +60,6 @@ public class GroupMessingServer implements Runnable {
         Message message = new Message(coordinator, member, MessageType.REMOVE, member.getId() + " has been removed by " +
                 "coordinator("+coordinator.getId()+")!");
 
-        System.out.println("Server: Removed and sending notification to member");
-
         try {
             // notify everyone about remove operation
             for (ObjectOutputStream out : outputStreams.values()) {
@@ -84,7 +82,7 @@ public class GroupMessingServer implements Runnable {
         // send to all
         Message message = new Message(null, null, MessageType.NOTIFICATION, messageTxt);
 
-        System.out.println("Server: Sending notification to everyone.");
+//        System.out.println("Server: Sending notification to everyone.");
         try {
             for (ObjectOutputStream out : outputStreams.values()) {
                 out.writeObject(message);
@@ -102,13 +100,13 @@ public class GroupMessingServer implements Runnable {
 
         // server details
         System.out.println("Server started on port: " + DEFAULT_PORT);
-        System.out.println("Server started on ip: " + IP_ADDRESS);
+        System.out.println("Server started on IP: " + IP_ADDRESS);
 
         while (true) {
             // accept clients
             socket = serverSocket.accept();
             System.out.println("");
-            System.out.println(" ---- Socket Accepted ---- ");
+            System.out.println("\n ---- Socket Accepted ---- ");
 
             // read member and in membership list
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -193,10 +191,10 @@ public class GroupMessingServer implements Runnable {
                         // if BROADCAST or NOTIFICATION message send to everyone, except me
                         else if (receivedMessage.getMessageType().equals(MessageType.BROADCAST) ||
                                 receivedMessage.getMessageType().equals(MessageType.NOTIFICATION)) {
-                            System.out.println("BROADCAST OR NOTIFICATION");
+//                            System.out.println("BROADCAST OR NOTIFICATION");
                             // send to all
                             for (ObjectOutputStream out : outputStreams.values()) {
-                                System.out.println("Object :: SEND ::" + member.getId());
+//                                System.out.println("Object :: SEND ::" + member.getId());
                                 out.writeObject(receivedMessage);
                                 out.flush();
                             }

@@ -43,22 +43,17 @@ public class MemberViewController implements Initializable, DTO {
     // properties
     private Member mainMember;
     private static final MembershipManager manager;
-    //    private volatile static GroupMessingServer server;
     private volatile ObjectOutputStream outputStream;
     private volatile ObjectInputStream inputStream;
 
     // static block
     static {
         manager = MembershipManager.getInstance();
-//        server = GroupMessingServer.getInstance();
     }
 
     @Override
     public void transfer(Object... data) {
-
         mainMember = (Member) data[0];
-
-//        System.out.println("Current Member: " + mainMember);
 
         // update member details in gui
         memberdetailsLblId.setText(String.format("Member Details: ID: %s,\t Listening Port: %d,\t" +
@@ -85,56 +80,95 @@ public class MemberViewController implements Initializable, DTO {
         thread.start();
     }
 
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        sendMsgTxtFldId.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                if (keyEvent.getCode() == KeyCode.ENTER) {
+                    // code to execute when the "Enter" key is pressed
+                    groupSendBtnAction(new ActionEvent());
+                }
+            }
+        });
+
+        // chat box will not editable
+        groupChatAreaId.setEditable(false);
+    }
+
+    @FXML
+    public void refreshStateButtonAction(ActionEvent event) {
+        updateMemberListState();
+    }
+
+    @FXML
+    public void groupSendBtnAction(ActionEvent event) {
+        // send group message to server, in separate thread
+        Thread thread = new Thread(() -> {
+            try {
+                // write on the output stream
+                Message message = new Message(mainMember, null,
+                        MessageType.BROADCAST, sendMsgTxtFldId.getText());
+
+                // send message to server
+                outputStream.writeObject(message);
+                outputStream.flush();
+
+                addText(message);
+                sendMsgTxtFldId.setText("");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
+    }
+
     // create and init client server
     private void createClient() throws IOException {
-//        System.out.println("In create client(" + mainMember.getId() + ") = " + mainMember.getId() + "\n");
 
         // establish the connection
         InetAddress IP_ADDRESS = InetAddress.getLocalHost();
         Socket socket = new Socket(IP_ADDRESS, 9000);
         System.out.println(socket);
 
+        // init input output stream
         outputStream = new ObjectOutputStream(socket.getOutputStream());
         inputStream = new ObjectInputStream(socket.getInputStream());
 
-//        System.out.println("Pass Member View to server: " + mainMember);
+        // send member
         outputStream.writeObject(mainMember);
         outputStream.flush();
-
-//        System.out.println("OUTPUT S: " + outputStream);
 
         // read message
         Thread readMessage = new Thread(() -> {
             while (true) {
-                System.out.println("In read msg view while: (" + mainMember.getId() + ")");
                 try {
                     // read the message sent to this client
                     Message msg = (Message) inputStream.readObject();
-                    System.out.println("READ MESSAGE:: " + msg);
+                    System.out.println("READ MESSAGE WHILE(" + mainMember.getId() + "):: " + msg);
 
                     // read notification
                     if (msg.getMessageType().equals(MessageType.NOTIFICATION)) {
                         addText(msg);
-//                        System.out.println("Notification:: " + msg);
                     }
 
                     // read broadcast message
                     if (msg.getMessageType().equals(MessageType.BROADCAST)) {
                         // don't show my own message
-//                        System.out.println("");
-//                        System.out.println("send:" + msg.getSender().getId());
-//                        System.out.println("main:" + mainMember.getId());
                         if (!msg.getSender().getId().equals(mainMember.getId()))
                             addText(msg);
                     }
 
                     // read broadcast message
                     if (msg.getMessageType().equals(MessageType.REMOVE)) {
-                        // don't show my own message
-                        System.out.println("REMOVED MESSAGE" + msg);
                         addText(msg);
                     }
 
+                    // read broadcast message
+                    if (msg.getMessageType().equals(MessageType.PRIVATE)) {
+                        addText(msg);
+                    }
 
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
@@ -146,7 +180,6 @@ public class MemberViewController implements Initializable, DTO {
 
     // add text in group chat box
     private synchronized void addText(Message message) {
-        System.out.println("In add message");
 
         // show notification in chat area
         if (message.getMessageType().equals(MessageType.NOTIFICATION)) {
@@ -171,7 +204,7 @@ public class MemberViewController implements Initializable, DTO {
             }
         }
 
-        // broadcast message in chat area
+        // broadcast remove message in chat area
         else if (message.getMessageType().equals(MessageType.REMOVE)) {
             String oldTxt = groupChatAreaId.getText();
             groupChatAreaId.setText(oldTxt + "\n" + String.format(
@@ -185,49 +218,6 @@ public class MemberViewController implements Initializable, DTO {
         items.remove(mainMember);
         membersListViewId.setItems(items);
         notificationLebelID.setText("");
-    }
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        sendMsgTxtFldId.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                if (keyEvent.getCode() == KeyCode.ENTER) {
-                    // code to execute when the "Enter" key is pressed
-                    groupSendBtnAction(new ActionEvent());
-                }
-            }
-        });
-
-    }
-
-    @FXML
-    public void refreshStateButtonAction(ActionEvent event) {
-        updateMemberListState();
-    }
-
-    @FXML
-    public void groupSendBtnAction(ActionEvent event) {
-        // send group message to server, in separate thread
-        Thread thread = new Thread(() -> {
-            try {
-//                System.out.println("In send message (" + mainMember.getId() + ")");
-
-                // write on the output stream
-                Message message = new Message(mainMember, null,
-                        MessageType.BROADCAST, sendMsgTxtFldId.getText());
-
-                outputStream.writeObject(message);
-                outputStream.flush();
-
-                addText(message);
-                sendMsgTxtFldId.setText("");
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        thread.start();
     }
 
     /**
@@ -284,7 +274,6 @@ public class MemberViewController implements Initializable, DTO {
 
             // Handle setting button action
             remove.setOnAction(event -> {
-//                System.out.println("In remove chat");
                 GroupMessingServer.removeAndNotify(member);
             });
 
