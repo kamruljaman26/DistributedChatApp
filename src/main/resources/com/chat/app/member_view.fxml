@@ -9,35 +9,35 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="500.0" prefWidth="819.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chat.app.controller.MemberViewController">
+<AnchorPane prefHeight="524.0" prefWidth="889.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.chat.app.controller.MemberViewController">
    <children>
-      <Label layoutX="307.0" layoutY="16.0" prefHeight="44.0" prefWidth="165.0" text="Chat App">
+      <Label layoutX="358.0" layoutY="16.0" prefHeight="44.0" prefWidth="176.0" text="CHAT APP">
          <font>
             <Font name="Arial Black" size="30.0" />
          </font>
       </Label>
-      <ListView fx:id="membersListViewId" layoutX="25.0" layoutY="141.0" prefHeight="338.0" prefWidth="352.0" />
-      <Button layoutX="202.0" layoutY="107.0" mnemonicParsing="false" onAction="#refreshStateButtonAction" prefHeight="25.0" prefWidth="176.0" text="REFRESH STATE" />
+      <ListView fx:id="membersListViewId" layoutX="25.0" layoutY="141.0" prefHeight="338.0" prefWidth="423.0" />
+      <Button layoutX="272.0" layoutY="107.0" mnemonicParsing="false" onAction="#refreshStateButtonAction" prefHeight="25.0" prefWidth="176.0" text="REFRESH STATE" />
       <Label layoutX="26.0" layoutY="106.0" text="Members List">
          <font>
-            <Font name="System Bold" size="18.0" />
+            <Font name="Arial Black" size="18.0" />
          </font>
       </Label>
-      <TextArea fx:id="groupChatAreaId" layoutX="404.0" layoutY="141.0" prefHeight="305.0" prefWidth="388.0" />
-      <Button layoutX="739.0" layoutY="453.0" mnemonicParsing="false" onAction="#groupSendBtnAction" prefHeight="25.0" prefWidth="54.0" text="SEND" />
-      <Label layoutX="403.0" layoutY="107.0" text="Group ChatBox">
+      <TextArea fx:id="groupChatAreaId" layoutX="474.0" layoutY="141.0" prefHeight="305.0" prefWidth="388.0" />
+      <Button layoutX="809.0" layoutY="453.0" mnemonicParsing="false" onAction="#groupSendBtnAction" prefHeight="25.0" prefWidth="54.0" text="SEND" />
+      <Label layoutX="475.0" layoutY="107.0" text="Group Chat">
          <font>
-            <Font name="System Bold" size="18.0" />
+            <Font name="Arial Black" size="18.0" />
          </font>
       </Label>
-      <Line endX="-100.0" endY="171.0" layoutX="490.0" layoutY="213.0" startX="-100.0" />
-      <Label layoutX="19.0" layoutY="478.0" prefHeight="46.0" prefWidth="768.0" style="-fx-alignment: center;" textFill="#861616">
+      <Line endX="-100.0" endY="171.0" layoutX="561.0" layoutY="213.0" startX="-100.0" />
+      <Label fx:id="notificationLebelID" layoutX="25.0" layoutY="478.0" prefHeight="46.0" prefWidth="840.0" style="-fx-alignment: center;" textFill="#861616">
          <font>
             <Font name="System Italic" size="12.0" />
          </font>
       </Label>
-      <TextField fx:id="sendMsgTxtFldId" layoutX="404.0" layoutY="454.0" prefHeight="25.0" prefWidth="329.0" />
-      <Label fx:id="memberdetailsLblId" layoutX="78.0" layoutY="57.0" prefHeight="36.0" prefWidth="645.0" text="Member Details: ">
+      <TextField fx:id="sendMsgTxtFldId" layoutX="474.0" layoutY="454.0" prefHeight="25.0" prefWidth="329.0" />
+      <Label fx:id="memberdetailsLblId" layoutX="78.0" layoutY="57.0" prefHeight="36.0" prefWidth="786.0" text="Member Details: ">
          <font>
             <Font size="18.0" />
          </font>

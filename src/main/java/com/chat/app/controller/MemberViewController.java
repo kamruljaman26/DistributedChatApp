@@ -6,6 +6,7 @@ import com.chat.app.model.MessageType;
 import com.chat.app.server.GroupMessingServer;
 import com.chat.app.server.MembershipManager;
 import com.chat.app.util.DTO;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -37,6 +38,8 @@ public class MemberViewController implements Initializable, DTO {
     public volatile TextField sendMsgTxtFldId;
     @FXML
     public Label memberdetailsLblId;
+    @FXML
+    public volatile Label notificationLebelID;
 
     // properties
     private Member mainMember;
@@ -58,7 +61,7 @@ public class MemberViewController implements Initializable, DTO {
 
         System.out.println("Current Member: " + mainMember);
 
-        // update member details
+        // update member details in gui
         memberdetailsLblId.setText(String.format("Member Details: ID: %s,\t Listening Port: %d,\t" +
                         "Coordinator: %s",
                 mainMember.getId(), mainMember.getListeningPort(), manager.isCoordinator(mainMember)));
@@ -66,6 +69,11 @@ public class MemberViewController implements Initializable, DTO {
         // init list view with members
         membersListViewId.setCellFactory(param -> new MemberListCell(mainMember));
         updateMemberListState();
+
+        // inform user she/he is the coordinator
+        if (manager.isCoordinator(mainMember)) {
+            notificationLebelID.setText("Congratulation you are the group coordinator.");
+        }
 
         // create client server
         Thread thread = new Thread(() -> {
@@ -90,27 +98,36 @@ public class MemberViewController implements Initializable, DTO {
         outputStream = new ObjectOutputStream(socket.getOutputStream());
         inputStream = new ObjectInputStream(socket.getInputStream());
 
-//        Member member = new Member("kkk", "192.168.0.100", 9000, 8000);
         System.out.println("Pass Member View to server: " + mainMember);
         outputStream.writeObject(mainMember);
         outputStream.flush();
 
         System.out.println("OUTPUT S: " + outputStream);
 
-        // readMessage thread
+        // read message
         Thread readMessage = new Thread(() -> {
             while (true) {
                 System.out.println("In read msg view while (" + mainMember.getId() + ")");
                 try {
                     // read the message sent to this client
                     Message msg = (Message) inputStream.readObject();
-
-                    // don't show my own message
-                    System.out.println("");
-                    System.out.println("send:" + msg.getSender().getId());
-                    System.out.println("main:" + mainMember.getId());
-                    if (!msg.getSender().getId().equals(mainMember.getId()))
+                    System.out.println(msg);
+                    // read notification
+                    if (msg.getMessageType().equals(MessageType.NOTIFICATION)) {
                         addText(msg);
+                        System.out.println("Notification:: " + msg);
+                    }
+                    // read broadcast message
+                    if (msg.getMessageType().equals(MessageType.BROADCAST)) {
+                        // don't show my own message
+                        System.out.println("");
+                        System.out.println("send:" + msg.getSender().getId());
+                        System.out.println("main:" + mainMember.getId());
+                        if (!msg.getSender().getId().equals(mainMember.getId()))
+                            addText(msg);
+                    }
+
+
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -119,18 +136,30 @@ public class MemberViewController implements Initializable, DTO {
         readMessage.start();
     }
 
-    // add text in server chat box
+    // add text in group chat box
     private synchronized void addText(Message message) {
-        System.out.println("In add message");
-        String oldTxt = groupChatAreaId.getText();
-        if (groupChatAreaId.getText().equals("")) {
-            groupChatAreaId.setText(String.format(
-                    "FROM (ID:%s) :: %s", message.getSender().getId(), message.getMessage()
-            ));
-        } else {
+
+        // notificationLebelID
+        if (message.getMessageType().equals(MessageType.NOTIFICATION)) {
+            String oldTxt = groupChatAreaId.getText();
             groupChatAreaId.setText(oldTxt + "\n" + String.format(
-                    "FROM (ID:%s) :: %s", message.getSender().getId(), message.getMessage()
+                    "Notification::\t%s", message.getMessage()
             ));
+        }
+        // broadcast
+        else if (message.getMessageType().equals(MessageType.BROADCAST)) {
+
+            System.out.println("In add message");
+            String oldTxt = groupChatAreaId.getText();
+            if (message.getSender().equals(mainMember)) {
+                groupChatAreaId.setText(oldTxt + "\n" + String.format(
+                        "ME::\t%s", message.getMessage()
+                ));
+            } else {
+                groupChatAreaId.setText(oldTxt + "\n" + String.format(
+                        "BY (%s)::\t%s", message.getSender().getId(), message.getMessage()
+                ));
+            }
         }
     }
 
@@ -139,6 +168,7 @@ public class MemberViewController implements Initializable, DTO {
         ObservableList<Member> items = FXCollections.observableArrayList(manager.getMembers());
         items.remove(mainMember);
         membersListViewId.setItems(items);
+        notificationLebelID.setText("");
     }
 
     @Override
@@ -190,6 +220,8 @@ public class MemberViewController implements Initializable, DTO {
 
         private final Label id = new Label();
         private final Label lPort = new Label();
+        private final Label ipAddress = new Label();
+        private final Label corrdinator = new Label();
         private final Button settingButton = new Button();
         private final Button chatButton = new Button();
         private final Member mainMember;
@@ -209,7 +241,9 @@ public class MemberViewController implements Initializable, DTO {
             }
 
             id.setText("ID: " + member.getId());
-            lPort.setText("Listening Port: " + member.getListeningPort());
+            lPort.setText("Port: " + member.getListeningPort());
+            ipAddress.setText("IP: " + member.getServerIpAddress());
+            corrdinator.setText("Coordinator: " + manager.isCoordinator(member));
 
             settingButton.setText("Setting");
             chatButton.setText("Chat");
@@ -217,18 +251,18 @@ public class MemberViewController implements Initializable, DTO {
             setGraphic(getHBox(member));
         }
 
-        // build horizonal box
+        // build horizontal box
         private HBox getHBox(Member member) {
 
             // if member is coordinator add setting button, else not add setting button
             HBox hbox;
             if (manager.isCoordinator(mainMember)) {
-                hbox = new HBox(id, lPort, settingButton, chatButton);
+                hbox = new HBox(id, ipAddress, lPort, settingButton, chatButton);
             } else {
-                hbox = new HBox(id, lPort, chatButton);
+                hbox = new HBox(id, ipAddress, lPort, corrdinator, chatButton);
             }
 
-            hbox.setSpacing(20);
+            hbox.setSpacing(10);
             hbox.setAlignment(Pos.CENTER);
 
             settingButton.setOnAction(event -> {

@@ -88,12 +88,18 @@ public class CreateMemberController implements Initializable {
             stage.setTitle("Chat Home");
             stage.setScene(scene);
 
+            // inform server so server can inform others
+            GroupMessingServer.sendNotificationToEveryone(member.getId()
+                    + " is joined in server!");
+
+            // if a member close or disconnected
             stage.setOnCloseRequest(event1 -> {
                 System.out.println("IN CHAT VIEW CLOSE");
-                // TODO: REMOVE FROM MEMBERSHIP & ADN CLOSE CLIENT HANDLER
                 manager.removeMember(member);
-                System.out.println("Member Removed:" + member);
-                System.out.println("Coordinator: " + manager.getCoordinator());
+
+                // inform server so server can inform others
+                GroupMessingServer.sendNotificationToEveryone(member.getId()
+                        + " is discounted from server!");
             });
 
             stage.show();

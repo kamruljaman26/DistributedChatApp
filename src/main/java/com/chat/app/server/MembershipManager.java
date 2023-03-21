@@ -68,10 +68,11 @@ public class MembershipManager {
     // return true if found by id
     public synchronized boolean removeMember(@NotNull Member member) {
         if (members.containsKey(member.getId())) {
-            if (coordinator.equals(member)) {
+            if (coordinator != null && coordinator.equals(member)) {
                 coordinator = null;
             }
             members.remove(member.getId());
+            GroupMessingServer.removeOutputStream(member.getId());
             return true;
         }
 

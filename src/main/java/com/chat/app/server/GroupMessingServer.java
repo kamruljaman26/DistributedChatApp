@@ -21,16 +21,14 @@ public class GroupMessingServer implements Runnable {
     private static final int TIMEOUT_MS = 10000;
 
     // clients and membership manager
-//    private volatile static Map<String, ClientHandler> clients;
     private volatile static Map<String, ObjectOutputStream> outputStreams;
     private volatile static MembershipManager manager;
-    private volatile static GroupMessingServer server;
+//    private volatile static GroupMessingServer server;
 
     // static block
     static {
         try {
             IP_ADDRESS = InetAddress.getLocalHost();
-//            clients = new HashMap<>();
             manager = MembershipManager.getInstance();
             outputStreams = new HashMap<>();
         } catch (UnknownHostException e) {
@@ -38,28 +36,20 @@ public class GroupMessingServer implements Runnable {
         }
     }
 
-    // default constructor
-    public GroupMessingServer() {
-    }
-
     // return singleton server
-    public static synchronized GroupMessingServer getInstance() {
+/*    public static synchronized GroupMessingServer getInstance() {
         if (server == null) {
             server = new GroupMessingServer();
             return server;
         } else
             return server;
-    }
+    }*/
 
     // return membership manager
-    public synchronized MembershipManager getManager() {
-        return manager;
-    }
+//    public synchronized MembershipManager getManager() {
+//        return manager;
+//    }
 
-/*    // get client handeler
-    public synchronized ClientHandler getClientHandler(String id) {
-        return clients.get(id);
-    }*/
 
     @Override
     public void run() {
@@ -73,6 +63,27 @@ public class GroupMessingServer implements Runnable {
             }
         });
         thread.start();
+    }
+
+    // remove object output stream of inactive member
+    public static synchronized void removeOutputStream(String id) {
+        outputStreams.remove(id);
+    }
+
+    // send notification to all active members
+    public static synchronized void sendNotificationToEveryone(String messageTxt) {
+        // send to all
+        Message message = new Message(null, null, MessageType.NOTIFICATION, messageTxt);
+
+        System.out.println("Server: Sending notification to everyone.");
+        try {
+            for (ObjectOutputStream out : outputStreams.values()) {
+                out.writeObject(message);
+                out.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // create the server for our chat application
