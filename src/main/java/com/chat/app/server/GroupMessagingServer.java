@@ -8,12 +8,14 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GroupMessagingServer implements Runnable {
+public class GroupMessagingServer extends Thread {
 
     // clients and membership manager
     private volatile static Map<String, Thread> clients;
     private volatile static Map<String, ObjectOutputStream> outputStreams;
     private volatile static MembershipManager manager;
+    private volatile static GroupMessagingServer server;
+    private volatile static Thread serverThread;
 
     // static block
     static {
@@ -22,12 +24,23 @@ public class GroupMessagingServer implements Runnable {
         clients = new HashMap<>();
     }
 
-    @Override
-    public void run() {
-        // start main server
-        Thread thread = new Thread(new MessagingServer(clients, outputStreams));
-        thread.start();
+    public static GroupMessagingServer getInstance() {
+        if (server == null)
+            server = new GroupMessagingServer();
+        return server;
     }
+
+    private GroupMessagingServer() {
+        // start main server
+        serverThread = new Thread(new MessagingServer(clients, outputStreams));
+        serverThread.start();
+    }
+
+    public void close() {
+        System.out.println("closed");
+        serverThread.interrupt();
+    }
+
 
     // remove and notify a member
     public static synchronized void removeAndNotify(Member member) {
@@ -47,7 +60,7 @@ public class GroupMessagingServer implements Runnable {
             outputStreams.remove(member.getId());
 
             Thread clientHandler = clients.get(member.getId());
-            clientHandler.stop();
+            clientHandler.interrupt();
             clients.remove(member.getId());
         } catch (IOException e) {
             e.printStackTrace();

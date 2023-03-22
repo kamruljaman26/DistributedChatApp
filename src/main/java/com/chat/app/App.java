@@ -35,9 +35,8 @@ public class App extends Application {
 
     public static void main(String[] args) {
 
-        Thread thread = new Thread(new GroupMessagingServer());
-        thread.start();
-
+        GroupMessagingServer.getInstance();
         launch(args);
+
     }
 }
