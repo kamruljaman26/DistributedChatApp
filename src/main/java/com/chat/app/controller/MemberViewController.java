@@ -50,8 +50,7 @@ public class MemberViewController implements Initializable, DTO, SendMessage {
     // properties
     private Member mainMember;
     private static final MembershipManager manager;
-    private volatile ObjectInputStream inputStream;
-    private volatile ObjectOutputStream outputStream;
+    private volatile ClientConnection handler;
 
     // private chats
     private final Map<String, SendMessage> sendMessageMap = new HashMap<>();
@@ -94,9 +93,7 @@ public class MemberViewController implements Initializable, DTO, SendMessage {
     public void send(Message message) {
         // send message to server
         try {
-            outputStream.writeObject(message);
-            outputStream.flush();
-
+            handler.sendMessage(message);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -130,8 +127,7 @@ public class MemberViewController implements Initializable, DTO, SendMessage {
                         MessageType.BROADCAST, sendMsgTxtFldId.getText());
 
                 // send message to server
-                outputStream.writeObject(message);
-                outputStream.flush();
+                handler.sendMessage(message);
 
                 addText(message);
                 sendMsgTxtFldId.setText("");
@@ -147,20 +143,16 @@ public class MemberViewController implements Initializable, DTO, SendMessage {
     private void createClient() throws IOException {
 
         // establish the connection
-        Socket socket = new Socket(Util.IP_ADDRESS, Util.DEFAULT_PORT);
-        inputStream = new ObjectInputStream(socket.getInputStream());
-        outputStream = new ObjectOutputStream(socket.getOutputStream());
-
-        outputStream.writeObject(mainMember);
-        outputStream.flush();
+        handler = new ClientConnection(Util.IP_ADDRESS, Util.DEFAULT_PORT);
+        handler.sendObject(mainMember);
 
         // read message
         Thread readMessage = new Thread(() -> {
             while (true) {
                 try {
                     // read the message sent to this client
-                    Message msg = (Message) inputStream.readObject();
-//                    System.out.println("READ MESSAGE WHILE(" + mainMember.getId() + "):: " + msg);
+                    Message msg = handler.readMessage();
+                    System.out.println("READ MESSAGE WHILE(" + mainMember.getId() + "):: " + msg);
 
                     // read notification
                     if (msg.getMessageType().equals(MessageType.NOTIFICATION)) {

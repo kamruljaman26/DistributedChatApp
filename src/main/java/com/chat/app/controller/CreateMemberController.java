@@ -44,10 +44,8 @@ public class CreateMemberController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // initially set value to easy demonstration
         serverIpAddressTxtFldID.setText(Util.IP_ADDRESS.getHostAddress());
-        serverPortTxtFldID.setText(Util.DEFAULT_PORT+"");
-        listeningPortTxtFld.setText("1234");
+        serverPortTxtFldID.setText(Util.DEFAULT_PORT + "");
     }
 
     @FXML
@@ -74,7 +72,7 @@ public class CreateMemberController implements Initializable {
             }
         } catch (Exception e) {
             errorTxtMsgId.setText("Server port and listening port should be an number. Also, all filed should be filled. ");
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 

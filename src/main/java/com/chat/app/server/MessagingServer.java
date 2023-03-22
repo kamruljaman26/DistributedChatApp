@@ -44,8 +44,8 @@ public class MessagingServer implements Runnable {
                 System.out.println("\n ---- Socket Accepted ---- ");
 
                 // read member and in membership list
-                ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
 
                 // read member
                 System.out.println("trying to read member");
