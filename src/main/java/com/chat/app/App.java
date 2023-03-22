@@ -17,7 +17,7 @@ public class App extends Application {
     public void start(Stage stage) throws Exception {
 
         /*
-         * Create 3 new member register window for demonstration
+         * Create 4 new member register window for demonstration
          */
         for (int i = 0; i < 4; i++) {
 
@@ -35,7 +35,10 @@ public class App extends Application {
 
     public static void main(String[] args) {
 
+        // start server
         GroupMessagingServer.getInstance();
+
+        // run application
         launch(args);
 
     }

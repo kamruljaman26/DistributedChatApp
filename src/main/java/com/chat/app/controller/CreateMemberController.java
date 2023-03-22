@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class CreateMemberController implements Initializable {
@@ -99,7 +100,8 @@ public class CreateMemberController implements Initializable {
             stage.setOnCloseRequest(event1 -> {
                 System.out.println("IN CHAT VIEW CLOSE");
                 manager.removeMember(member);
-
+                Map<String, Thread> clients = GroupMessagingServer.getClients();
+                clients.get(member.getId()).stop();
                 // inform server so server can inform others
                 GroupMessagingServer.sendNotificationToEveryone(member.getId()
                         + " is discounted from server!");

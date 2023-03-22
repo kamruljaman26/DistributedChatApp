@@ -15,8 +15,6 @@ import static org.junit.Assert.assertEquals;
 
 public class GroupMessagingServerTest {
 
-    //    private static final int PORT = 9000;
-//    private MembershipManager membershipManager;
     private GroupMessagingServer server;
     private Member member1;
     private Member member2;

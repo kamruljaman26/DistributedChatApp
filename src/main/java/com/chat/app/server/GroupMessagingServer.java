@@ -30,6 +30,10 @@ public class GroupMessagingServer extends Thread {
         return server;
     }
 
+    public static Map<String, Thread> getClients() {
+        return clients;
+    }
+
     private GroupMessagingServer() {
         // start main server
         serverThread = new Thread(new MessagingServer(clients, outputStreams));
@@ -38,7 +42,7 @@ public class GroupMessagingServer extends Thread {
 
     public void close() {
         System.out.println("closed");
-        serverThread.interrupt();
+        serverThread.stop();
     }
 
 
@@ -60,7 +64,7 @@ public class GroupMessagingServer extends Thread {
             outputStreams.remove(member.getId());
 
             Thread clientHandler = clients.get(member.getId());
-            clientHandler.interrupt();
+            clientHandler.stop();
             clients.remove(member.getId());
         } catch (IOException e) {
             e.printStackTrace();
