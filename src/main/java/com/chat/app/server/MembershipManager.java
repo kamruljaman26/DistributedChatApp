@@ -8,8 +8,8 @@ import java.util.*;
 // used singleton pattern so there will only one membership manager object.
 public class MembershipManager {
 
-    private static Map<String, Member> members = new HashMap<>();
-    private static MembershipManager membershipManager;
+    private static volatile Map<String, Member> members = new HashMap<>();
+    private static volatile MembershipManager membershipManager;
     private Member coordinator = null;
 
     // default constructor
@@ -72,7 +72,6 @@ public class MembershipManager {
                 coordinator = null;
             }
             members.remove(member.getId());
-            GroupMessingServer.removeOutputStream(member.getId());
             return true;
         }
 

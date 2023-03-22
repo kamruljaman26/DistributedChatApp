@@ -4,10 +4,12 @@ import com.chat.app.App;
 import com.chat.app.model.Member;
 import com.chat.app.model.Message;
 import com.chat.app.model.MessageType;
-import com.chat.app.server.GroupMessingServer;
+import com.chat.app.server.ClientConnection;
+import com.chat.app.server.GroupMessagingServer;
 import com.chat.app.server.MembershipManager;
 import com.chat.app.util.DTO;
 import com.chat.app.util.SendMessage;
+import com.chat.app.util.Util;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -23,7 +25,6 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.util.HashMap;
@@ -49,11 +50,11 @@ public class MemberViewController implements Initializable, DTO, SendMessage {
     // properties
     private Member mainMember;
     private static final MembershipManager manager;
-    private volatile ObjectOutputStream outputStream;
     private volatile ObjectInputStream inputStream;
+    private volatile ObjectOutputStream outputStream;
 
     // private chats
-    private volatile Map<String, SendMessage> sendMessageMap = new HashMap<>();
+    private final Map<String, SendMessage> sendMessageMap = new HashMap<>();
 
     // static block
     static {
@@ -146,15 +147,10 @@ public class MemberViewController implements Initializable, DTO, SendMessage {
     private void createClient() throws IOException {
 
         // establish the connection
-        InetAddress IP_ADDRESS = InetAddress.getLocalHost();
-        Socket socket = new Socket(IP_ADDRESS, 9000);
-        System.out.println(socket);
-
-        // init input output stream
-        outputStream = new ObjectOutputStream(socket.getOutputStream());
+        Socket socket = new Socket(Util.IP_ADDRESS, Util.DEFAULT_PORT);
         inputStream = new ObjectInputStream(socket.getInputStream());
+        outputStream = new ObjectOutputStream(socket.getOutputStream());
 
-        // send member
         outputStream.writeObject(mainMember);
         outputStream.flush();
 
@@ -320,7 +316,7 @@ public class MemberViewController implements Initializable, DTO, SendMessage {
 
             // Handle setting button action
             remove.setOnAction(event -> {
-                GroupMessingServer.removeAndNotify(member);
+                GroupMessagingServer.removeAndNotify(member);
             });
 
             // handle personal details button

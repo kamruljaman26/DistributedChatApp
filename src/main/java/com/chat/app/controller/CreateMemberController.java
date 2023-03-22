@@ -2,9 +2,10 @@ package com.chat.app.controller;
 
 import com.chat.app.App;
 import com.chat.app.model.Member;
-import com.chat.app.server.GroupMessingServer;
+import com.chat.app.server.GroupMessagingServer;
 import com.chat.app.server.MembershipManager;
 import com.chat.app.util.DTO;
+import com.chat.app.util.Util;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -43,6 +44,10 @@ public class CreateMemberController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // initially set value to easy demonstration
+        serverIpAddressTxtFldID.setText(Util.IP_ADDRESS.getHostAddress());
+        serverPortTxtFldID.setText(Util.DEFAULT_PORT+"");
+        listeningPortTxtFld.setText("1234");
     }
 
     @FXML
@@ -54,8 +59,8 @@ public class CreateMemberController implements Initializable {
             int listeningPort = Integer.parseInt(listeningPortTxtFld.getText());
 
             // check if given information match with our server or not
-            if (serverPort != GroupMessingServer.DEFAULT_PORT ||
-                    !serverIpAddress.equals(GroupMessingServer.IP_ADDRESS.getHostAddress())) {
+            if (serverPort != Util.DEFAULT_PORT ||
+                    !serverIpAddress.equals(Util.IP_ADDRESS.getHostAddress())) {
                 errorTxtMsgId.setText("Server not found, with your given information.");
             }
 
@@ -69,7 +74,7 @@ public class CreateMemberController implements Initializable {
             }
         } catch (Exception e) {
             errorTxtMsgId.setText("Server port and listening port should be an number. Also, all filed should be filled. ");
-//            e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -89,7 +94,7 @@ public class CreateMemberController implements Initializable {
             stage.setScene(scene);
 
             // inform server so server can inform others
-            GroupMessingServer.sendNotificationToEveryone(member.getId()
+            GroupMessagingServer.sendNotificationToEveryone(member.getId()
                     + " is joined in server!");
 
             // if a member close or disconnected
@@ -98,7 +103,7 @@ public class CreateMemberController implements Initializable {
                 manager.removeMember(member);
 
                 // inform server so server can inform others
-                GroupMessingServer.sendNotificationToEveryone(member.getId()
+                GroupMessagingServer.sendNotificationToEveryone(member.getId()
                         + " is discounted from server!");
             });
 

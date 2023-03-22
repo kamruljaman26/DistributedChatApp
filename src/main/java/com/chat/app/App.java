@@ -1,7 +1,7 @@
 package com.chat.app;
 
 
-import com.chat.app.server.GroupMessingServer;
+import com.chat.app.server.GroupMessagingServer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -34,7 +34,10 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
-        Platform.runLater(new GroupMessingServer());
+
+        Thread thread = new Thread(new GroupMessagingServer());
+        thread.start();
+
         launch(args);
     }
 }
